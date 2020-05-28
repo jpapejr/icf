@@ -6,6 +6,8 @@
 # Note: Argument 2 is the directory holding the provisioning scripts
 # and does not include the script name.
 #
+# Note: Script requires: [ansible, ibmcloud cli, jq]
+#
 if [ $# -eq 0 ]; then
     echo "No arguments provided"
     exit 1
