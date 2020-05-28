@@ -48,5 +48,11 @@
         register: cluster_out
       - name: attach_zone2
         shell: ibmcloud ks zone add vpc-gen2 --cluster {{ lookup('env', 'petname') }} --subnet-id $(ibmcloud is subnets | grep vpc-{{ lookup('env', 'petname') }}-subnet2 | awk '/.*/ {print $1}') --zone {{ lookup('env', 'region') }}-2 --worker-pool default
+      - name: wait_for_cluster_ready
+        when: cluster_out is succeeded
+        shell: while [ "$(ibmcloud ks cluster get -c {{ updated_cluster_name }} --json | jq ".state" | sed -e 's/^"//' -e 's/"$//')" != "normal" ]; do printf . && sleep 60; done
+        register: cluster_wait_out
       - debug:
-          msg: "Cluster create issued: {{ cluster_out.stdout }}    VPC: vpc-{{ lookup('env', 'petname') }} : {{vpc_id.stdout}} in {{ lookup('env', 'region') }}"
+        var: cluster_wait_out
+      - debug:
+          msg: "Cluster: {{ lookup('env', 'petname') }} / VPC: vpc-{{ lookup('env', 'petname') }} : {{vpc_id.stdout}} in {{ lookup('env', 'region') }}"
