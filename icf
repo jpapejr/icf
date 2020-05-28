@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# IBM Cloud Formation - my hack to get around sub-par UXs
+# Syntax: icf <config file> </path/to/provisioning/directory>
+# 
+# Note: Argument 2 is the directory holding the provisioning scripts
+# and does not include the script name.
+#
+if [ $# -eq 0 ]; then
+    echo "No arguments provided"
+    exit 1
+fi
+set -a
+source $1 
+if [[ "$3" == "-d" ]]; then
+  ansible-playbook $2/icf-destroy.yaml
+else
+  ansible-playbook $2/icf-create.yaml
+fi
+set +a
