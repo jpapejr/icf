@@ -1,5 +1,5 @@
 ---
-- name: multi-az-ocp-on-vpc2-compute
+- name: multi-az-cluster-on-vpc2-compute
   hosts: localhost
   gather_facts: no
   tasks:
