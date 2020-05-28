@@ -53,6 +53,6 @@
         shell: while [ "$(ibmcloud ks cluster get -c {{ updated_cluster_name }} --json | jq ".state" | sed -e 's/^"//' -e 's/"$//')" != "normal" ]; do printf . && sleep 60; done
         register: cluster_wait_out
       - debug:
-        var: cluster_wait_out
+          var: cluster_wait_out
       - debug:
           msg: "Cluster: {{ lookup('env', 'petname') }} / VPC: vpc-{{ lookup('env', 'petname') }} : {{vpc_id.stdout}} in {{ lookup('env', 'region') }}"
