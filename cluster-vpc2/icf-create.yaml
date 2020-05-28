@@ -43,7 +43,7 @@
       - name: create_subnet2
         shell: ibmcloud is subnet-create vpc-{{ lookup('env', 'petname') }}-subnet2  {{ vpc_id.stdout }} --zone {{ lookup('env', 'region') }}-2 --public-gateway-id $(ibmcloud is public-gateways | grep vpc-{{ lookup('env', 'petname') }}-subnet2-pgw | awk '/.*/ {print $1}') --ipv4-cidr-block {{ lookup('env', 'prefix2') }}/24
     - block:
-      - name: create_ocp_cluster
+      - name: create_cluster
         shell: ibmcloud ks cluster create vpc-gen2 --name {{ lookup('env', 'petname') }} --zone {{ lookup('env', 'region') }}-1 --vpc-id {{ vpc_id.stdout }} --subnet-id $(ibmcloud is subnets | grep vpc-{{ lookup('env', 'petname') }}-subnet1 | awk '/.*/ {print $1}') --flavor {{ lookup('env', 'flavor') }} --workers  {{ lookup('env', 'workers') }} --version  {{ lookup('env', 'version') }}
         register: cluster_out
       - name: attach_zone2
