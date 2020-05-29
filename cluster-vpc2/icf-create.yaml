@@ -74,7 +74,7 @@
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/is-pgw2.out"
       register: pgw2_out
-     - copy: content="{{ pgw2_out }}" dest="./{{ lookup('env','CONFIG_FILE') }}/is-pgw2.out"
+    - copy: content="{{ pgw2_out }}" dest="./{{ lookup('env','CONFIG_FILE') }}/is-pgw2.out"
     - name: create_subnet1
       shell: ibmcloud is subnet-create vpc-{{ lookup('env', 'petname') }}-subnet1  {{ vpc_id.stdout }} --zone {{ lookup('env', 'region') }}-1 --public-gateway-id $(ibmcloud is public-gateways | grep vpc-{{ lookup('env', 'petname') }}-subnet1-pgw | awk '/.*/ {print $1}') --ipv4-cidr-block {{ lookup('env', 'prefix1') }}/24
       args:
