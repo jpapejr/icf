@@ -14,7 +14,7 @@
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/is-target.out"
         with: "{{ target_out }}"
-      registry: target_out
+      register: target_out
     - name: create_vpc
       shell: ibmcloud is vpc-create vpc-{{ lookup('env', 'petname') }} --address-prefix-management manual --json
       args:
@@ -56,7 +56,7 @@
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/is-prefix2.out"
         with: "{{ prefix2_out }}"
-      registry: prefix2_out
+      register: prefix2_out
     - name: create_prefix3
       shell: ibmcloud is vpc-address-prefix-create prefix3 {{ vpc_id.stdout }} {{ lookup('env', 'region') }}-3 {{ lookup('env', 'prefix3') }}/18
       args:
