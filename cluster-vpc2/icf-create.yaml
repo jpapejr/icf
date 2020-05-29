@@ -80,13 +80,13 @@
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/is-subnet1.out"
       register: subnet1_out
-     - copy: content="{{ subnet1_out }}" dest="./{{ lookup('env','CONFIG_FILE') }}/is-subnet1.out"
+    - copy: content="{{ subnet1_out }}" dest="./{{ lookup('env','CONFIG_FILE') }}/is-subnet1.out"
     - name: create_subnet2
       shell: ibmcloud is subnet-create vpc-{{ lookup('env', 'petname') }}-subnet2  {{ vpc_id.stdout }} --zone {{ lookup('env', 'region') }}-2 --public-gateway-id $(ibmcloud is public-gateways | grep vpc-{{ lookup('env', 'petname') }}-subnet2-pgw | awk '/.*/ {print $1}') --ipv4-cidr-block {{ lookup('env', 'prefix2') }}/24
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/is-subnet2.out"
       register: subnet2_out
-   - copy: content="{{ subnet2_out }}" dest="./{{ lookup('env','CONFIG_FILE') }}/is-subnet2.out"
+    - copy: content="{{ subnet2_out }}" dest="./{{ lookup('env','CONFIG_FILE') }}/is-subnet2.out"
     - name: create_cluster
       shell: ibmcloud ks cluster create vpc-gen2 --name {{ lookup('env', 'petname') }} --zone {{ lookup('env', 'region') }}-1 --vpc-id {{ vpc_id.stdout }} --subnet-id $(ibmcloud is subnets | grep vpc-{{ lookup('env', 'petname') }}-subnet1 | awk '/.*/ {print $1}') --flavor {{ lookup('env', 'flavor') }} --workers  {{ lookup('env', 'workers') }} --version  {{ lookup('env', 'version') }}  {{ lookup('env', 'extra_cluster_flags') }}
       args:
