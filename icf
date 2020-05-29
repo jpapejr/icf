@@ -8,6 +8,7 @@
 #
 # Note: Script requires: [ansible, ibmcloud cli, jq]
 #
+export CONFIG_FILE=`basename $1`
 if [ $# -eq 0 ]; then
     echo "No arguments provided"
     exit 1
