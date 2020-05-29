@@ -3,6 +3,11 @@
   hosts: localhost
   gather_facts: no
   tasks:
+    - name: create_state_dir
+      file:
+        path: "./{{ lookup('env','CONFIG_FILE') }}"
+        state: directory
+        mode: '0755'
     - name: ibmcloud_login
       shell: ibmcloud login -r {{ lookup('env','region') }} -u jtpape@us.ibm.com -c "{{ lookup('env','account_id') }}" -d default --apikey {{ lookup('env','ibmcloud_api_key') }}
       args:
