@@ -7,102 +7,85 @@
       shell: ibmcloud login -r {{ lookup('env','region') }} -u jtpape@us.ibm.com -c "{{ lookup('env','account_id') }}" -d default --apikey {{ lookup('env','ibmcloud_api_key') }}
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/ic-login.out"
-        with: "{{ auth_out }}"
       register: auth_out 
     - name: target_vpc2
       shell: ibmcloud is target --gen 2
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/is-target.out"
-        with: "{{ target_out }}"
       register: target_out
     - name: create_vpc
       shell: ibmcloud is vpc-create vpc-{{ lookup('env', 'petname') }} --address-prefix-management manual --json
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/is-vpc-create.out"
-        with: "{{ vpc_out }}"
       register: vpc_out
     - name: get_vpc_id
       shell: ibmcloud is vpcs | grep vpc-{{ lookup('env', 'petname') }} | awk '/.*/ { print $1}'
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/is-vpc-id.out"
-        with: "{{ vpc_id }}"
       register: vpc_id
     - name: update_vpc_default_sg
       shell: ibmcloud is sgu $(ibmcloud is sgs | grep $(ibmcloud is vpcs | grep vpc-{{ lookup('env', 'petname') }} | awk '/.*/ { print $6}') | awk '/.*/ {print $1}') --name vpc-{{ lookup('env', 'petname') }}-default 
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/is-update-sg.out"
-        with: "{{ update_sg }}"
       register: update_sg
     - name: update_vpc_default_nwacl
       shell: ibmcloud is nwaclu $(ibmcloud is nwacls | grep $(ibmcloud is vpcs | grep vpc-{{ lookup('env', 'petname') }} | awk '/.*/ { print $5}') | awk '/.*/ {print $1}') --name vpc-{{ lookup('env', 'petname') }}-default 
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/is-update-nwacl.out"
-        with: "{{ update_nwacl }}"
       register: update_nwacl
     - name: update_default_sg_for_iks
       shell: ibmcloud is security-group-rule-add $(ibmcloud is sgs | grep $(ibmcloud is vpcs | grep vpc-{{ lookup('env', 'petname') }} | awk '/.*/ { print $6}') | awk '/.*/ {print $1}') inbound tcp --port-min 30000 --port-max 32767
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/is-sg-add.out"
-        with: "{{ add_iks_rule_out }}"
       register: add_iks_rule_out
     - name: create_prefix1
       shell: ibmcloud is vpc-address-prefix-create prefix1 {{ vpc_id.stdout }} {{ lookup('env', 'region') }}-1 {{ lookup('env', 'prefix1') }}/18 
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/is-prefix1.out"
-        with: "{{ prefix1_out }}"
       register: prefix1_out
     - name: create_prefix2
       shell: ibmcloud is vpc-address-prefix-create prefix2 {{ vpc_id.stdout }} {{ lookup('env', 'region') }}-2 {{ lookup('env', 'prefix2') }}/18
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/is-prefix2.out"
-        with: "{{ prefix2_out }}"
       register: prefix2_out
     - name: create_prefix3
       shell: ibmcloud is vpc-address-prefix-create prefix3 {{ vpc_id.stdout }} {{ lookup('env', 'region') }}-3 {{ lookup('env', 'prefix3') }}/18
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/is-prefix3.out"
-        with: "{{ prefix3_out }}"
       register: prefix3_out
     - name: create_subnet1_pgw
       shell: ibmcloud is public-gateway-create vpc-{{ lookup('env', 'petname') }}-subnet1-pgw {{ vpc_id.stdout }}  {{ lookup('env', 'region') }}-1
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/is-pgw1.out"
-        with: "{{ pgw1_out }}"
       register: pgw1_out
     - name: create_subnet2_pgw
       shell: ibmcloud is public-gateway-create vpc-{{ lookup('env', 'petname') }}-subnet2-pgw {{ vpc_id.stdout }}  {{ lookup('env', 'region') }}-2
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/is-pgw2.out"
-        with: "{{ pgw2_out }}"
       register: pgw2_out
     - name: create_subnet1
       shell: ibmcloud is subnet-create vpc-{{ lookup('env', 'petname') }}-subnet1  {{ vpc_id.stdout }} --zone {{ lookup('env', 'region') }}-1 --public-gateway-id $(ibmcloud is public-gateways | grep vpc-{{ lookup('env', 'petname') }}-subnet1-pgw | awk '/.*/ {print $1}') --ipv4-cidr-block {{ lookup('env', 'prefix1') }}/24
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/is-subnet1.out"
-        with: "{{ subnet1_out }}"
       register: subnet1_out
     - name: create_subnet2
       shell: ibmcloud is subnet-create vpc-{{ lookup('env', 'petname') }}-subnet2  {{ vpc_id.stdout }} --zone {{ lookup('env', 'region') }}-2 --public-gateway-id $(ibmcloud is public-gateways | grep vpc-{{ lookup('env', 'petname') }}-subnet2-pgw | awk '/.*/ {print $1}') --ipv4-cidr-block {{ lookup('env', 'prefix2') }}/24
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/is-subnet2.out"
-        with: "{{ subnet2_out }}"
       register: subnet2_out
     - name: create_cluster
       shell: ibmcloud ks cluster create vpc-gen2 --name {{ lookup('env', 'petname') }} --zone {{ lookup('env', 'region') }}-1 --vpc-id {{ vpc_id.stdout }} --subnet-id $(ibmcloud is subnets | grep vpc-{{ lookup('env', 'petname') }}-subnet1 | awk '/.*/ {print $1}') --flavor {{ lookup('env', 'flavor') }} --workers  {{ lookup('env', 'workers') }} --version  {{ lookup('env', 'version') }}  {{ lookup('env', 'extra_cluster_flags') }}
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/ks-cluster.out"
-        with: "{{ cluster_out }}"
       register: cluster_out
     - name: attach_zone2
       shell: ibmcloud ks zone add vpc-gen2 --cluster {{ lookup('env', 'petname') }} --subnet-id $(ibmcloud is subnets | grep vpc-{{ lookup('env', 'petname') }}-subnet2 | awk '/.*/ {print $1}') --zone {{ lookup('env', 'region') }}-2 --worker-pool default
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/ks-zoneadd.out"
-        with: "{{  zone_add_out }}"
       register: zone_add_out
     - name: wait_for_cluster_ready
       when: cluster_out is succeeded
       shell: while [ "$(ibmcloud ks cluster get -c {{ lookup('env', 'petname') }} --json | jq ".state" | sed -e 's/^"//' -e 's/"$//')" != "normal" ]; do printf . && sleep 60; done
       args:
         creates: "./{{ lookup('env','CONFIG_FILE') }}/ks-clusterwait.out"
-        with: "{{ cluster_wait_out }}"
       register: cluster_wait_out
